@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantheon Historical Museum | Artifact Explorer & Exhibition Pass</title>
+    <!-- Tailwind CSS CDN -->
+    <script>
+try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){var __m={};Object.defineProperty(window,'localStorage',{value:{getItem:function(k){return k in __m?__m[k]:null},setItem:function(k,v){__m[k]=String(v)},removeItem:function(k){delete __m[k]}}})}
+document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&!t.dataset.fb){t.dataset.fb=1;t.src='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efe9dd"/><stop offset="1" stop-color="#d9cfba"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/><g fill="none" stroke="#7a1f2b" stroke-width="6" opacity=".55"><path d="M250 250h300L400 160z"/><path d="M280 270v150M360 270v150M440 270v150M520 270v150M250 440h300"/></g></svg>')}},true);
+</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        museum: {
+                            obsidian: '#f7f3ec',
+                            dark: '#efe9dd',
+                            surface: '#fffdf8',
+                            card: '#e9e2d3',
+                            border: 'rgba(122, 31, 43, 0.22)',
+                            gold: '#7a1f2b',
+                            goldLight: '#6b1b27',
+                            goldMuted: '#5c1722',
+                            parchment: '#f8f5ee',
+                            slate: '#6b6458'
+                        }
+                    },
+                    fontFamily: {
+    serif: ['"Playfair Display"', 'Georgia', 'serif'],
+    sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+    mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+}
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.460.0"></script>
+    <!-- QRCode JS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f7f3ec; }
+        ::-webkit-scrollbar-thumb { background: #cfc5b0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7a1f2b; }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #b5485a 0%, #7a1f2b 50%, #5c1722 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-pattern {
+            background-color: #f7f3ec;
+            background-image: radial-gradient(rgba(122, 31, 43, 0.08) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+        .pass-notch-left {
+            position: absolute;
+            left: -12px;
+            top: 68%;
+            width: 24px;
+            height: 24px;
+            background-color: #f7f3ec;
+            border-radius: 50%;
+        }
+        .pass-notch-right {
+            position: absolute;
+            right: -12px;
+            top: 68%;
+            width: 24px;
+            height: 24px;
+            background-color: #f7f3ec;
+            border-radius: 50%;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #printable-pass-container, #printable-pass-container * { visibility: visible; }
+            #printable-pass-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+                border: 2px solid #000 !important;
+            }
+        }
+    html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', system-ui, sans-serif; }
+
+/* scroll progress bar */
+#scroll-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 60;
+    background: linear-gradient(90deg, #5c1722, #6b1b27, #7a1f2b); box-shadow: 0 0 10px #7a1f2b; }
+
+/* soft gold spotlight that follows the mouse */
+#spotlight { position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background: radial-gradient(500px circle at var(--mx, 50%) var(--my, 30%), rgba(122,31,43,.09), transparent 60%); }
+
+/* reveal on scroll */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* cards rise in every time the grid re-renders (search / filter) */
+@keyframes rise { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
+#artifacts-grid > div, #exhibitions-grid > div { animation: rise .6s ease both; transition: transform .15s ease-out, border-color .3s, box-shadow .3s; will-change: transform; }
+#artifacts-grid > div:hover, #exhibitions-grid > div:hover { box-shadow: 0 20px 45px -15px rgba(122,31,43,.35); }
+
+/* shimmering gold title */
+.gold-gradient-text { background-size: 200% auto; animation: shimmer 6s linear infinite; }
+@keyframes shimmer { to { background-position: 200% center; } }
+
+/* floating hero card */
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+#hero .lg\:col-span-5 > div { animation: floaty 6s ease-in-out infinite; }
+
+/* header shrink on scroll */
+header.scrolled .h-20 { height: 3.75rem; transition: height .3s; }
+
+/* back to top */
+#to-top { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 50; width: 44px; height: 44px; border-radius: 9999px;
+    background: #7a1f2b; color: #f7f3ec; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transform: translateY(20px); transition: .3s; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
+#to-top.show { opacity: 1; pointer-events: auto; transform: none; }
+
+/* modal drag cursor + fade in */
+#modal-image { cursor: grab; touch-action: none; }
+#modal-image:active { cursor: grabbing; }
+#artifact-modal:not(.hidden) > div { animation: rise .4s ease both; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
+
+    
+/* ===== Ivory gallery theme (museum palette: ivory, ink, oxblood) ===== */
+body{background:#f7f3ec;color:#1f1a17}
+.text-white,.text-slate-100,.text-slate-200{color:#1f1a17!important}
+.text-slate-300{color:#3f3832!important}
+.text-slate-400{color:#5a5248!important}
+.text-slate-500{color:#7a7166!important}
+.hover\:text-white:hover{color:#7a1f2b!important}
+.bg-slate-800,.bg-slate-900{background-color:#e4dccb!important}
+.hover\:bg-slate-700:hover,.hover\:bg-slate-600:hover{background-color:#d9cfba!important}
+.border-slate-600,.border-slate-700,.border-slate-800,.border-slate-600\/60,.border-slate-700\/60,.border-slate-700\/80{border-color:rgba(60,45,35,.18)!important}
+.text-emerald-400{color:#047857!important}
+.text-rose-400,.text-rose-300\/80{color:#be123c!important}
+#artifacts-grid img,#exhibitions-grid img{filter:saturate(.85) contrast(1.03)}
+h1,h2,h3,h4{letter-spacing:.01em}
+/* dark ticket stays dark */
+#printable-pass-container{background:linear-gradient(180deg,#3a1119,#1f0a0f)!important}
+#printable-pass-container .text-white,#printable-pass-container .text-slate-100{color:#fff!important}
+#printable-pass-container .text-slate-300{color:#e5d5d7!important}
+#printable-pass-container .text-slate-400{color:#c9aeb2!important}
+#printable-pass-container .text-museum-gold,#printable-pass-container .text-museum-goldLight{color:#f0b4bd!important}
+#printable-pass-container .text-emerald-400{color:#6ee7b7!important}
+#printable-pass-container .border-slate-700,#printable-pass-container .border-slate-600\/60{border-color:rgba(255,255,255,.2)!important}
+@media print{#printable-pass-container{background:#fff!important}#printable-pass-container *{color:#000!important}}
+    </style>
+</head>
+<body class="bg-museum-obsidian text-slate-100 font-sans antialiased selection:bg-museum-gold selection:text-museum-obsidian">
+<div id="scroll-progress"></div>
+<div id="spotlight"></div>
+<button id="to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-28 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3 bg-museum-surface border border-museum-gold/40 px-5 py-3 rounded-2xl shadow-2xl text-sm font-medium">
+        <i id="toast-icon" data-lucide="check-circle-2" class="text-museum-gold w-5 h-5 flex-shrink-0"></i>
+        <span id="toast-message" class="text-slate-100">Notification message</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-museum-obsidian/95 backdrop-blur-md border-b border-museum-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Museum Logo / Title -->
+                <a href="#hero" class="flex items-center space-x-3 group">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-museum-gold to-museum-goldMuted p-[1px] shadow-lg flex items-center justify-center">
+                        <div class="w-full h-full bg-museum-obsidian rounded-xl flex items-center justify-center group-hover:bg-museum-gold/10 transition-colors">
+                            <i data-lucide="landmark" class="w-6 h-6 text-museum-gold"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="font-serif text-lg md:text-xl font-bold tracking-wider block gold-gradient-text">PANTHEON ARCHIVES</span>
+                        <span class="text-[10px] tracking-widest text-museum-slate uppercase">City Museum of Art & Antiquities</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                    <a href="#explorer" class="text-slate-300 hover:text-museum-gold transition-colors flex items-center space-x-1.5">
+                        <i data-lucide="compass" class="w-4 h-4"></i>
+                        <span>Explore Artifacts</span>
+                    </a>
+                    <a href="#exhibitions" class="text-slate-300 hover:text-museum-gold transition-colors flex items-center space-x-1.5">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        <span>Exhibitions</span>
+                    </a>
+                    <a href="#ticketing" class="text-slate-300 hover:text-museum-gold transition-colors flex items-center space-x-1.5">
+                        <i data-lucide="ticket" class="w-4 h-4"></i>
+                        <span>Book Pass</span>
+                    </a>
+                    <a href="#my-passes" class="text-slate-300 hover:text-museum-gold transition-colors flex items-center space-x-1.5">
+                        <i data-lucide="wallet-cards" class="w-4 h-4"></i>
+                        <span>My Passes</span>
+                        <span id="nav-pass-badge" class="hidden ml-1 px-1.5 py-0.2 bg-museum-gold text-museum-obsidian text-[10px] font-bold rounded-full">0</span>
+                    </a>
+                    <a href="#visitor-info" class="text-slate-300 hover:text-museum-gold transition-colors flex items-center space-x-1.5">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                        <span>Visitor Info</span>
+                    </a>
+                </nav>
+
+                <!-- Actions: Tour Quick View & Buy Pass CTA -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleTourFilter()" id="tour-nav-btn" title="View Saved Tour Artifacts" class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-museum-surface border border-museum-border text-xs font-semibold text-slate-300 hover:border-museum-gold transition">
+                        <i data-lucide="bookmark-check" class="w-4 h-4 text-museum-gold"></i>
+                        <span id="nav-tour-label">My Tour (0)</span>
+                    </button>
+                    <a href="#ticketing" class="inline-flex items-center space-x-1.5 px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider font-bold bg-gradient-to-r from-museum-gold to-museum-goldMuted text-museum-obsidian hover:brightness-110 active:scale-95 transition-all shadow-md">
+                        <span>Get Pass</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                    <!-- Mobile Hamburger -->
+                    <button id="mobile-toggle" class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-museum-surface">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div id="mobile-drawer" class="hidden md:hidden bg-museum-dark/95 border-b border-museum-border px-4 py-4 space-y-3">
+            <a href="#explorer" class="mobile-link block px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-museum-surface hover:text-museum-gold">Explore Artifacts</a>
+            <a href="#exhibitions" class="mobile-link block px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-museum-surface hover:text-museum-gold">Current Exhibitions</a>
+            <a href="#ticketing" class="mobile-link block px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-museum-surface hover:text-museum-gold">Book Exhibition Pass</a>
+            <a href="#my-passes" class="mobile-link block px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-museum-surface hover:text-museum-gold">My Passes Wallet</a>
+            <a href="#visitor-info" class="mobile-link block px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-museum-surface hover:text-museum-gold">Visitor Info & Hours</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="relative hero-pattern pt-20 pb-28 border-b border-museum-border overflow-hidden">
+            <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-museum-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-museum-surface border border-museum-gold/30 text-museum-goldLight text-xs tracking-wider font-mono">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Wings I – VIII Open Today • 09:30 – 18:00</span>
+                        </div>
+                        <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15]">
+                            Chronicles of <br>
+                            <span class="gold-gradient-text">Human Triumph</span> and Antiquity.
+                        </h1>
+                        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 font-light leading-relaxed">
+                            Delve into five millennia of preserved relics, illuminated codices, and imperial treasuries. Experience 360° artifact views, curator voice guides, and reserved timed-entry exhibition passes.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-3">
+                            <a href="#explorer" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-7 py-3.5 rounded-xl font-bold bg-gradient-to-r from-museum-gold to-museum-goldMuted text-museum-obsidian shadow-lg hover:brightness-110 active:scale-95 transition-all">
+                                <i data-lucide="compass" class="w-4 h-4"></i>
+                                <span>Inspect Artifact Vault</span>
+                            </a>
+                            <a href="#ticketing" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-7 py-3.5 rounded-xl font-semibold bg-museum-surface border border-museum-gold/40 text-museum-goldLight hover:bg-museum-card hover:border-museum-gold transition-all">
+                                <i data-lucide="ticket" class="w-4 h-4 text-museum-gold"></i>
+                                <span>Book Admission Pass</span>
+                            </a>
+                        </div>
+
+                        <!-- Highlights Banner -->
+                        <div class="pt-8 grid grid-cols-3 gap-4 border-t border-slate-800 text-center lg:text-left">
+                            <div>
+                                <span class="font-serif text-2xl font-bold text-white block">3,400+</span>
+                                <span class="text-xs text-slate-400">Curated Antiquities</span>
+                            </div>
+                            <div>
+                                <span class="font-serif text-2xl font-bold text-white block">8 Wings</span>
+                                <span class="text-xs text-slate-400">Permanent Galleries</span>
+                            </div>
+                            <div>
+                                <span class="font-serif text-2xl font-bold text-white block">100%</span>
+                                <span class="text-xs text-slate-400">Digital Smart Entry</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Featured Artifact Showcase Card -->
+                    <div class="lg:col-span-5 relative">
+                        <div class="relative rounded-3xl overflow-hidden border border-museum-gold/30 bg-museum-surface shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=900&q=80" 
+                                 alt="Classical Greek Marble Bust" 
+                                 class="w-full h-96 object-cover object-center filter saturate-90 hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-museum-obsidian via-museum-obsidian/40 to-transparent"></div>
+                            <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-museum-dark/85 backdrop-blur-md border border-museum-border">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="text-[10px] text-museum-gold font-mono uppercase tracking-widest block">Wing II • Masterpiece</span>
+                                        <h4 class="font-serif font-bold text-white text-base">Apollo of Rhodes Bust</h4>
+                                        <p class="text-xs text-slate-300">c. 280 BCE • Hellenistic Marble</p>
+                                    </div>
+                                    <button onclick="openArtifactModal(1)" class="p-3 rounded-xl bg-museum-gold text-museum-obsidian hover:brightness-110 transition shadow" title="Inspect relic in 360°">
+                                        <i data-lucide="scan-line" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Artifact Explorer Section -->
+        <section id="explorer" class="py-20 bg-museum-obsidian border-b border-museum-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Section Header -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-museum-gold text-xs uppercase tracking-widest font-mono mb-2">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                            <span>Interactive Museum Archive</span>
+                        </div>
+                        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">Artifact Explorer</h2>
+                        <p class="text-sm text-slate-400 mt-2 max-w-xl">
+                            Search thousands of authenticated artifacts. Inspect simulated 360° rotations, listen to curator voice narrations, and bookmark items for your custom museum tour.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                        <button id="tour-filter-toggle" onclick="toggleTourFilter()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-museum-surface border border-museum-border hover:border-museum-gold text-slate-200 text-xs font-semibold transition">
+                            <i data-lucide="bookmark" class="w-4 h-4 text-museum-gold"></i>
+                            <span id="tour-filter-label">My Tour (0)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div class="bg-museum-surface/70 border border-museum-border rounded-2xl p-6 backdrop-blur-md mb-10 space-y-6">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-4 top-3.5"></i>
+                        <input type="text" id="artifact-search-box" placeholder="Search relics by name, era, excavation site, or material (e.g., Marble, Gold, Damascus, Astrolabe)..." 
+                               class="w-full bg-museum-dark text-slate-100 placeholder-slate-500 pl-12 pr-10 py-3 rounded-xl border border-slate-700/80 focus:outline-none focus:border-museum-gold transition text-sm">
+                        <button id="clear-search" class="hidden absolute right-3.5 top-3.5 text-slate-400 hover:text-white" onclick="clearSearchFilter()">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Filter Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Eras -->
+                        <div>
+                            <span class="block text-xs uppercase tracking-wider text-museum-gold font-mono mb-2">Historical Era</span>
+                            <div class="flex flex-wrap gap-2" id="era-button-group">
+                                <button class="era-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-gold text-museum-obsidian" data-era="all">All Eras</button>
+                                <button class="era-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-era="Ancient">Ancient Antiquity</button>
+                                <button class="era-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-era="Medieval">Medieval</button>
+                                <button class="era-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-era="Renaissance">Renaissance</button>
+                                <button class="era-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-era="Modern">Colonial & Modern</button>
+                            </div>
+                        </div>
+
+                        <!-- Categories -->
+                        <div>
+                            <span class="block text-xs uppercase tracking-wider text-museum-gold font-mono mb-2">Category</span>
+                            <div class="flex flex-wrap gap-2" id="category-button-group">
+                                <button class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-gold text-museum-obsidian" data-cat="all">All Categories</button>
+                                <button class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-cat="Sculpture">Sculpture</button>
+                                <button class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-cat="Manuscripts">Manuscripts</button>
+                                <button class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-cat="Weaponry">Weaponry</button>
+                                <button class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-cat="Relics">Relics</button>
+                                <button class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-museum-card text-slate-300 hover:text-white hover:bg-slate-700" data-cat="Jewelry">Jewelry</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artifacts Grid -->
+                <div id="artifacts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Populated via JavaScript -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="no-artifacts-found" class="hidden text-center py-20 bg-museum-surface/40 rounded-2xl border border-dashed border-slate-700">
+                    <i data-lucide="archive-x" class="w-12 h-12 mx-auto text-slate-500 mb-3"></i>
+                    <h3 class="font-serif text-lg font-bold text-slate-200">No Matching Artifacts</h3>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Adjust your search keyword or selected filters to explore other historical items.</p>
+                    <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-museum-gold/20 text-museum-gold text-xs font-semibold rounded-lg hover:bg-museum-gold hover:text-museum-obsidian transition">
+                        Reset All Filters
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Current Exhibitions Section -->
+        <section id="exhibitions" class="py-20 bg-museum-dark border-b border-museum-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-14">
+                    <span class="text-museum-gold text-xs uppercase font-mono tracking-widest block mb-2">Curated Seasonal Highlights</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">Temporary & Feature Exhibitions</h2>
+                    <p class="text-sm text-slate-300 mt-3 font-light">
+                        Timed admission grants access to secured, temperature-controlled gallery wings with exclusive loans from global antiquities archives.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="exhibitions-grid">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Exhibition Pass Booking System -->
+        <section id="ticketing" class="py-20 bg-museum-obsidian border-b border-museum-border">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-xl mx-auto mb-12">
+                    <span class="text-museum-gold text-xs uppercase font-mono tracking-widest block mb-2">Digital Ticketing Office</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">Book Your Exhibition Pass</h2>
+                    <p class="text-sm text-slate-300 mt-2">
+                        Instant pass generation with scannable entry QR codes and wallet storage.
+                    </p>
+                </div>
+
+                <!-- Booking Stepper Container -->
+                <div class="bg-museum-surface border border-museum-gold/30 rounded-3xl shadow-2xl p-6 sm:p-10">
+                    <!-- Progress Stepper -->
+                    <div class="flex items-center justify-between mb-8 max-w-md mx-auto">
+                        <div class="flex items-center space-x-2 text-museum-gold">
+                            <span class="w-8 h-8 rounded-full bg-museum-gold text-museum-obsidian font-bold flex items-center justify-center text-sm">1</span>
+                            <span class="text-xs font-semibold">Exhibition</span>
+                        </div>
+                        <div class="h-0.5 flex-1 mx-3 bg-slate-700"></div>
+                        <div id="step-nav-2" class="flex items-center space-x-2 text-slate-500">
+                            <span class="w-8 h-8 rounded-full bg-museum-card text-slate-300 font-bold flex items-center justify-center text-sm">2</span>
+                            <span class="text-xs font-semibold">Tickets & Time</span>
+                        </div>
+                        <div class="h-0.5 flex-1 mx-3 bg-slate-700"></div>
+                        <div id="step-nav-3" class="flex items-center space-x-2 text-slate-500">
+                            <span class="w-8 h-8 rounded-full bg-museum-card text-slate-300 font-bold flex items-center justify-center text-sm">3</span>
+                            <span class="text-xs font-semibold">Pass</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Exhibition Selection -->
+                    <div id="flow-step-1" class="space-y-6">
+                        <h3 class="font-serif text-xl font-bold text-slate-100 flex items-center space-x-2">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-museum-gold"></i>
+                            <span>Step 1: Choose Your Exhibition or General Admission</span>
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="booking-exhibition-cards">
+                            <!-- Populated with JS -->
+                        </div>
+                        <div class="flex justify-end pt-4">
+                            <button onclick="advanceBookingStep(2)" class="px-6 py-3 bg-museum-gold text-museum-obsidian font-bold text-sm rounded-xl hover:brightness-110 flex items-center space-x-2 transition">
+                                <span>Continue to Tickets & Date</span>
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Date, Slot, Tickets, Promo & Buyer Form -->
+                    <div id="flow-step-2" class="hidden space-y-6">
+                        <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                            <div>
+                                <h3 class="font-serif text-xl font-bold text-slate-100">Step 2: Dates, Entry Slot & Tickets</h3>
+                                <p class="text-xs text-museum-gold mt-0.5" id="step2-exhibition-label">General Gallery Pass</p>
+                            </div>
+                            <button onclick="advanceBookingStep(1)" class="text-xs text-slate-400 hover:text-white underline">Change Exhibition</button>
+                        </div>
+
+                        <!-- Date & Slot Picker -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-slate-300 font-mono mb-2">Visit Date *</label>
+                                <input type="date" id="booking-date" class="w-full bg-museum-dark border border-slate-700 text-slate-100 px-4 py-2.5 rounded-xl text-sm focus:border-museum-gold outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-slate-300 font-mono mb-2">Timed Entry Slot *</label>
+                                <div class="grid grid-cols-3 gap-2" id="slot-buttons">
+                                    <button type="button" class="slot-btn py-2 text-xs rounded-xl border border-museum-gold bg-museum-gold text-museum-obsidian font-semibold" onclick="selectSlot(this, 'Morning (10:00 AM)')">10:00 AM</button>
+                                    <button type="button" class="slot-btn py-2 text-xs rounded-xl border border-slate-700 bg-museum-dark hover:border-museum-gold text-slate-200" onclick="selectSlot(this, 'Afternoon (02:00 PM)')">02:00 PM</button>
+                                    <button type="button" class="slot-btn py-2 text-xs rounded-xl border border-slate-700 bg-museum-dark hover:border-museum-gold text-slate-200" onclick="selectSlot(this, 'Twilight Curator (05:30 PM)')">05:30 PM</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Tiers Quantity -->
+                        <div class="space-y-3">
+                            <label class="block text-xs uppercase tracking-wider text-slate-300 font-mono">Select Passes</label>
+                            
+                            <!-- Tier 1: General -->
+                            <div class="flex items-center justify-between p-4 rounded-xl bg-museum-dark border border-slate-800">
+                                <div>
+                                    <h4 class="font-medium text-sm text-slate-100">General Admission</h4>
+                                    <p class="text-xs text-slate-400">Standard access to selected exhibition & all permanent wings</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm font-semibold text-museum-gold">$18.00</span>
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="modifyTicketQty('general', -1)" class="w-8 h-8 rounded-lg bg-museum-surface text-slate-300 flex items-center justify-center hover:bg-slate-700 font-bold">-</button>
+                                        <span id="qty-general" class="w-6 text-center font-semibold text-sm">1</span>
+                                        <button onclick="modifyTicketQty('general', 1)" class="w-8 h-8 rounded-lg bg-museum-surface text-slate-300 flex items-center justify-center hover:bg-slate-700 font-bold">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tier 2: Student/Senior -->
+                            <div class="flex items-center justify-between p-4 rounded-xl bg-museum-dark border border-slate-800">
+                                <div>
+                                    <h4 class="font-medium text-sm text-slate-100">Student & Senior</h4>
+                                    <p class="text-xs text-slate-400">Valid student ID or 65+ age verification at entry gate</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm font-semibold text-museum-gold">$12.00</span>
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="modifyTicketQty('reduced', -1)" class="w-8 h-8 rounded-lg bg-museum-surface text-slate-300 flex items-center justify-center hover:bg-slate-700 font-bold">-</button>
+                                        <span id="qty-reduced" class="w-6 text-center font-semibold text-sm">0</span>
+                                        <button onclick="modifyTicketQty('reduced', 1)" class="w-8 h-8 rounded-lg bg-museum-surface text-slate-300 flex items-center justify-center hover:bg-slate-700 font-bold">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tier 3: VIP Curator Audio Pass -->
+                            <div class="flex items-center justify-between p-4 rounded-xl bg-museum-dark border border-slate-800">
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h4 class="font-medium text-sm text-slate-100">VIP Curator Audio Pass</h4>
+                                        <span class="px-2 py-0.5 text-[9px] bg-museum-gold/20 text-museum-gold rounded font-bold">POPULAR</span>
+                                    </div>
+                                    <p class="text-xs text-slate-400">Includes binaural audio wand, priority queue & research catalog</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm font-semibold text-museum-gold">$30.00</span>
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="modifyTicketQty('vip', -1)" class="w-8 h-8 rounded-lg bg-museum-surface text-slate-300 flex items-center justify-center hover:bg-slate-700 font-bold">-</button>
+                                        <span id="qty-vip" class="w-6 text-center font-semibold text-sm">0</span>
+                                        <button onclick="modifyTicketQty('vip', 1)" class="w-8 h-8 rounded-lg bg-museum-surface text-slate-300 flex items-center justify-center hover:bg-slate-700 font-bold">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attendee Details Form -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-slate-300 font-mono mb-1">Lead Attendee Name *</label>
+                                <input type="text" id="attendee-name" placeholder="e.g., Victoria Sterling" class="w-full bg-museum-dark border border-slate-700 px-4 py-2.5 rounded-xl text-sm focus:border-museum-gold outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-slate-300 font-mono mb-1">Email for Pass Delivery *</label>
+                                <input type="email" id="attendee-email" placeholder="victoria@antiquity.org" class="w-full bg-museum-dark border border-slate-700 px-4 py-2.5 rounded-xl text-sm focus:border-museum-gold outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Discount Promo Code Bar -->
+                        <div class="p-4 rounded-xl bg-museum-dark/60 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div class="flex-1 w-full sm:w-auto">
+                                <label class="block text-[11px] uppercase tracking-wider text-slate-400 font-mono mb-1">Have a Promo Code? (Try 'MUSEUM10' or 'ARCHIVE20')</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="promo-code-input" placeholder="PROMO CODE" class="uppercase bg-museum-surface border border-slate-700 px-3 py-2 rounded-lg text-xs tracking-wider font-mono text-white focus:border-museum-gold outline-none w-full sm:w-48">
+                                    <button type="button" onclick="applyPromoCode()" class="px-4 py-2 bg-museum-card hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-museum-gold">Apply</button>
+                                </div>
+                                <span id="promo-message" class="text-[11px] font-mono mt-1 block"></span>
+                            </div>
+
+                            <!-- Pricing Breakdown -->
+                            <div class="w-full sm:w-auto text-right text-xs space-y-1">
+                                <div class="text-slate-400">Subtotal: <span id="bill-subtotal" class="text-slate-200 font-medium">$18.00</span></div>
+                                <div class="text-slate-400">Taxes & Historic Preservation (8%): <span id="bill-tax" class="text-slate-200 font-medium">$1.44</span></div>
+                                <div id="bill-discount-row" class="text-emerald-400 hidden">Discount: -<span id="bill-discount">$0.00</span></div>
+                                <div class="font-serif text-xl font-bold text-museum-gold pt-1">Total: <span id="bill-total">$19.44</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 Actions -->
+                        <div class="flex items-center justify-between pt-2">
+                            <button onclick="advanceBookingStep(1)" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">Back</button>
+                            <button onclick="generateDigitalPass()" class="px-7 py-3 bg-gradient-to-r from-museum-gold to-museum-goldMuted text-museum-obsidian font-bold text-sm rounded-xl hover:brightness-110 shadow-lg active:scale-95 transition flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                <span>Confirm & Generate Pass</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Digital Pass Generated Presentation -->
+                    <div id="flow-step-3" class="hidden space-y-6">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-serif text-2xl font-bold text-white">Digital Pass Issued</h3>
+                            <p class="text-xs text-slate-300 mt-1">Your reservation has been authenticated and added to your pass wallet.</p>
+                        </div>
+
+                        <!-- Ticket Card (Boarding Pass Design) -->
+                        <div id="printable-pass-container" class="max-w-md mx-auto relative bg-gradient-to-b from-[#3a1119] to-[#1f0a0f] border-2 border-museum-gold/40 rounded-3xl p-6 shadow-2xl text-slate-100 overflow-hidden">
+                            <div class="pass-notch-left border-r border-museum-gold/40"></div>
+                            <div class="pass-notch-right border-l border-museum-gold/40"></div>
+
+                            <!-- Ticket Top Bar -->
+                            <div class="flex items-center justify-between pb-4 border-b border-slate-700">
+                                <div>
+                                    <span class="text-[9px] uppercase tracking-widest text-museum-gold font-mono block">OFFICIAL TIMED PASS</span>
+                                    <h4 class="font-serif font-bold text-base text-white" id="ticket-view-title">Empires of Gold & Sun</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[9px] text-slate-400 uppercase font-mono block">BOOKING REF</span>
+                                    <span class="text-xs font-mono font-bold text-museum-goldLight" id="ticket-view-ref">#MHM-72910</span>
+                                </div>
+                            </div>
+
+                            <!-- Ticket Metadata -->
+                            <div class="grid grid-cols-2 gap-4 py-4 text-xs">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 uppercase font-mono block">Lead Attendee</span>
+                                    <span class="font-semibold text-slate-100 text-sm block" id="ticket-view-name">Victoria Sterling</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 uppercase font-mono block">Date & Time Slot</span>
+                                    <span class="font-semibold text-slate-100 block" id="ticket-view-slot">Tomorrow • 10:00 AM</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 uppercase font-mono block">Chamber / Hall</span>
+                                    <span class="text-slate-300 block" id="ticket-view-wing">West Grand Pavilion</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 uppercase font-mono block">Admissions Tier</span>
+                                    <span class="text-slate-300 block" id="ticket-view-tier">1 Ticket • Standard</span>
+                                </div>
+                            </div>
+
+                            <!-- Perforation Line -->
+                            <div class="relative py-2 border-b-2 border-dashed border-slate-600/60 my-1"></div>
+
+                            <!-- QR Code & Barcode Area -->
+                            <div class="pt-3 flex flex-col items-center justify-center space-y-3">
+                                <div id="pass-qrcode-box" class="p-3 bg-white rounded-xl shadow-inner">
+                                    <!-- QR Code generated here -->
+                                </div>
+                                <span class="font-mono text-[11px] tracking-widest text-slate-400" id="ticket-view-code">SCAN-ENTRY-KEY</span>
+                                <span class="text-[10px] text-emerald-400 bg-emerald-950/70 border border-emerald-500/30 px-3 py-0.5 rounded-full font-mono">
+                                    VALID FOR ADMISSION & RE-ENTRY
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Action Controls -->
+                        <div class="flex flex-wrap items-center justify-center gap-3 pt-3">
+                            <button onclick="window.print()" class="px-5 py-2.5 bg-museum-surface hover:bg-museum-card border border-museum-gold/30 rounded-xl text-xs font-semibold text-museum-gold flex items-center space-x-2 transition">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                                <span>Print / Save PDF</span>
+                            </button>
+                            <a href="#my-passes" class="px-5 py-2.5 bg-museum-gold text-museum-obsidian rounded-xl text-xs font-bold hover:brightness-110 flex items-center space-x-2 transition">
+                                <i data-lucide="wallet-cards" class="w-4 h-4"></i>
+                                <span>View In Pass Wallet</span>
+                            </a>
+                            <button onclick="resetBookingFlow()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition">
+                                Book Another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Passes / Wallet Section -->
+        <section id="my-passes" class="py-20 bg-museum-dark border-b border-museum-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-museum-border mb-8">
+                    <div>
+                        <span class="text-museum-gold text-xs uppercase font-mono tracking-widest block mb-1">Stored Passes</span>
+                        <h2 class="font-serif text-3xl font-bold text-white">My Pass Wallet</h2>
+                        <p class="text-xs text-slate-400 mt-1">Passes are saved locally on this device. Present the barcode or QR code at entry turnstiles.</p>
+                    </div>
+                    <button onclick="clearWalletPasses()" id="clear-passes-btn" class="mt-4 sm:mt-0 text-xs text-rose-400 hover:text-rose-300 underline font-medium">
+                        Clear Wallet History
+                    </button>
+                </div>
+
+                <!-- Passes List -->
+                <div id="wallet-passes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="wallet-empty" class="text-center py-16 bg-museum-surface/30 rounded-2xl border border-dashed border-slate-700">
+                    <i data-lucide="ticket" class="w-12 h-12 mx-auto text-slate-500 mb-3"></i>
+                    <h3 class="font-serif text-lg font-bold text-slate-300">No Exhibition Passes Saved</h3>
+                    <p class="text-xs text-slate-400 mt-1">Reserve admission tickets using our online booking desk to generate passes.</p>
+                    <a href="#ticketing" class="mt-4 inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-museum-gold text-museum-obsidian font-bold text-xs hover:brightness-110 transition">
+                        <span>Book Your First Pass</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visitor Information & Protocols -->
+        <section id="visitor-info" class="py-20 bg-museum-obsidian">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-museum-gold text-xs uppercase font-mono tracking-widest block mb-2">Planning Your Visit</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">Visitor Guidelines & Accessibility</h2>
+                    <p class="text-sm text-slate-400 mt-2">
+                        Essential information to ensure an inspiring and seamless journey through the city's foremost historical sanctuary.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Hours -->
+                    <div class="p-6 rounded-2xl bg-museum-surface/70 border border-museum-border space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-museum-gold/15 text-museum-gold flex items-center justify-center">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="font-serif font-bold text-white text-base">Opening Hours</h4>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex justify-between border-b border-slate-800 pb-1">
+                                <span>Tuesday – Sunday</span>
+                                <span class="font-mono text-museum-gold">09:30 – 18:00</span>
+                            </li>
+                            <li class="flex justify-between border-b border-slate-800 pb-1">
+                                <span>Thursday Late Nights</span>
+                                <span class="font-mono text-museum-gold">Until 21:00</span>
+                            </li>
+                            <li class="flex justify-between text-rose-300/80">
+                                <span>Mondays</span>
+                                <span>Closed for Restoration</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Location & Transit -->
+                    <div class="p-6 rounded-2xl bg-museum-surface/70 border border-museum-border space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-museum-gold/15 text-museum-gold flex items-center justify-center">
+                            <i data-lucide="map-pin" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="font-serif font-bold text-white text-base">Location & Transit</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            14 Grand Sanctuary Way, Cultural District, City Central. <br>
+                            Direct access via <strong>Metropolitan Line (Sanctuary Station)</strong> or Tram Line 4. Valet bicycle parking and underground EV charging available.
+                        </p>
+                    </div>
+
+                    <!-- Photography & Accessibility -->
+                    <div class="p-6 rounded-2xl bg-museum-surface/70 border border-museum-border space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-museum-gold/15 text-museum-gold flex items-center justify-center">
+                            <i data-lucide="accessibility" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="font-serif font-bold text-white text-base">Accessibility & Etiquette</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Full ADA wheelchair accessibility across all 8 gallery wings with complimentary motorized chairs available at information desk. Non-flash photography permitted; tripods restricted.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Artifact Modal Viewer (360 Inspection & Speech Audio Guide) -->
+    <div id="artifact-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-museum-surface border border-museum-gold/30 rounded-3xl shadow-2xl overflow-hidden my-6">
+            <!-- Modal Close Button -->
+            <button onclick="closeArtifactModal()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-museum-obsidian/80 hover:bg-museum-obsidian border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 max-h-[85vh] overflow-y-auto">
+                <!-- Visual / 360 Rotation Column -->
+                <div class="lg:col-span-6 bg-museum-obsidian p-6 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-mono tracking-widest text-museum-gold uppercase" id="modal-era">Era</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 font-mono" id="modal-wing">Wing</span>
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-white" id="modal-title">Relic Title</h3>
+                    </div>
+
+                    <!-- 360 Inspection Viewport -->
+                    <div class="relative my-6 select-none">
+                        <div class="w-full h-72 rounded-2xl overflow-hidden relative border border-museum-border bg-museum-card flex items-center justify-center">
+                            <img id="modal-image" src="" alt="Artifact view" class="w-full h-full object-cover transition-transform duration-200">
+                            <!-- Rotation Badge -->
+                            <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/80 backdrop-blur rounded text-[10px] font-mono text-museum-goldLight">
+                                <span id="modal-angle-label">Rotation: 0°</span>
+                            </div>
+                        </div>
+
+                        <!-- 360 Controls -->
+                        <div class="mt-4 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] text-slate-400">
+                                <span class="flex items-center space-x-1">
+                                    <i data-lucide="rotate-3d" class="w-3.5 h-3.5 text-museum-gold"></i>
+                                    <span>360° Inspection Angle</span>
+                                </span>
+                                <span class="text-[10px] text-slate-500">Drag slider or tap steps</span>
+                            </div>
+                            <input type="range" id="modal-slider" min="0" max="360" value="0" step="5" class="w-full accent-museum-gold bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                            <div class="flex justify-between pt-1">
+                                <button onclick="stepRotation(-45)" class="px-2.5 py-1 text-[10px] bg-museum-card rounded hover:bg-slate-700 text-slate-300">-45°</button>
+                                <button onclick="resetModalRotation()" class="px-2.5 py-1 text-[10px] bg-museum-card rounded hover:bg-slate-700 text-slate-300">Front (0°)</button>
+                                <button onclick="stepRotation(45)" class="px-2.5 py-1 text-[10px] bg-museum-card rounded hover:bg-slate-700 text-slate-300">+45°</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Narration Bar -->
+                    <div class="p-3.5 rounded-2xl bg-museum-dark border border-museum-border space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="headphones" class="w-4 h-4 text-museum-gold"></i>
+                                <span class="text-xs font-semibold text-slate-200">Curator Audio Narration</span>
+                            </div>
+                            <span id="speech-status-tag" class="text-[10px] font-mono text-slate-400">Ready</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button id="modal-play-btn" onclick="toggleSpeechAudio()" class="p-2.5 rounded-xl bg-museum-gold text-museum-obsidian hover:brightness-110 transition">
+                                <i id="modal-play-icon" data-lucide="play" class="w-4 h-4"></i>
+                            </button>
+                            <div class="flex-1">
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                    <div id="speech-progress" class="h-full bg-museum-gold w-0 transition-all duration-300"></div>
+                                </div>
+                                <span class="text-[10px] text-slate-400 block mt-1">Browser SpeechSynthesis Audio Guide</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Provenance & Historical Context Column -->
+                <div class="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                    <div class="space-y-4">
+                        <h4 class="font-serif text-lg font-bold text-white border-b border-slate-700/60 pb-2">Historical Provenance & Context</h4>
+                        <p id="modal-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+                            Detailed background text will populate here.
+                        </p>
+
+                        <!-- Relic Specs -->
+                        <div class="grid grid-cols-2 gap-3 pt-2 text-xs">
+                            <div class="p-3 bg-museum-dark rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-museum-gold uppercase font-mono block">Estimated Date</span>
+                                <span id="modal-date" class="font-medium text-slate-200">Date</span>
+                            </div>
+                            <div class="p-3 bg-museum-dark rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-museum-gold uppercase font-mono block">Excavation Site</span>
+                                <span id="modal-site" class="font-medium text-slate-200">Site</span>
+                            </div>
+                            <div class="p-3 bg-museum-dark rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-museum-gold uppercase font-mono block">Medium / Material</span>
+                                <span id="modal-material" class="font-medium text-slate-200">Material</span>
+                            </div>
+                            <div class="p-3 bg-museum-dark rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-museum-gold uppercase font-mono block">Dimensions</span>
+                                <span id="modal-dimensions" class="font-medium text-slate-200">Dimensions</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Modal Buttons -->
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                        <button id="modal-tour-btn" onclick="toggleModalTour()" class="flex items-center space-x-2 text-xs font-semibold text-slate-300 hover:text-museum-gold transition">
+                            <i id="modal-tour-icon" data-lucide="bookmark" class="w-4 h-4"></i>
+                            <span id="modal-tour-text">Add to My Tour</span>
+                        </button>
+                        <a href="#ticketing" onclick="closeArtifactModal()" class="px-5 py-2.5 bg-museum-gold text-museum-obsidian rounded-xl text-xs font-bold hover:brightness-110 transition">
+                            Reserve Gallery Pass
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-museum-obsidian border-t border-museum-border pt-16 pb-12 text-slate-400 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="landmark" class="w-5 h-5 text-museum-gold"></i>
+                        <span class="font-serif font-bold text-white tracking-wider text-sm">PANTHEON ARCHIVES</span>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed">
+                        Dedicated to preserving human antiquities, scientific discoveries, and artistic marvels across five thousand years of documented civilization.
+                    </p>
+                </div>
+                <div>
+                    <h5 class="font-serif font-bold text-white mb-3 uppercase tracking-wider text-[11px] text-museum-gold">Permanent Galleries</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#explorer" class="hover:text-white transition">Wing I: Egyptian Dynasties</a></li>
+                        <li><a href="#explorer" class="hover:text-white transition">Wing II: Greco-Roman Sculptures</a></li>
+                        <li><a href="#explorer" class="hover:text-white transition">Wing IV: Medieval Scriptorium</a></li>
+                        <li><a href="#explorer" class="hover:text-white transition">Wing VI: Renaissance Scientific Relics</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-serif font-bold text-white mb-3 uppercase tracking-wider text-[11px] text-museum-gold">Timed Admission Desk</h5>
+                    <p class="text-slate-300 mb-1">Morning Slot: 10:00 AM</p>
+                    <p class="text-slate-300 mb-1">Afternoon Slot: 02:00 PM</p>
+                    <p class="text-slate-300 mb-1">Twilight Curator Slot: 05:30 PM</p>
+                    <p class="text-museum-gold font-mono mt-2">Pass Desk: +1 (800) 555-HIST</p>
+                </div>
+                <div>
+                    <h5 class="font-serif font-bold text-white mb-3 uppercase tracking-wider text-[11px] text-museum-gold">Curator Dispatch</h5>
+                    <p class="mb-3 text-slate-400">Receive private notices for artifact restorations and after-hours collector tours.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your academic email..." class="bg-museum-surface px-3 py-2 text-xs rounded-l-xl border border-slate-700 text-slate-200 focus:outline-none focus:border-museum-gold w-full">
+                        <button onclick="showToast('Thank you for subscribing to curator bulletins.')" class="bg-museum-gold text-museum-obsidian px-3.5 rounded-r-xl font-bold hover:brightness-110">Join</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-slate-800 text-center flex flex-col sm:flex-row items-center justify-between text-slate-500">
+                <p>© Historical City Museum Foundation. Educational & Public Exhibition Project.</p>
+                <div class="flex space-x-6 mt-4 sm:mt-0">
+                    <a href="#" class="hover:text-slate-300">Privacy Charter</a>
+                    <a href="#" class="hover:text-slate-300">Conservation Rules</a>
+                    <a href="#" class="hover:text-slate-300">Academic Citation Protocol</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Comprehensive JavaScript Logic -->
+    <script>
+        /* ==========================================================================
+           1. DATA REPOSITORIES: ARTIFACTS & EXHIBITIONS
+           ========================================================================== */
+        const ARTIFACTS = [
+            {
+                id: 1,
+                title: "Apollo of Rhodes Bust",
+                era: "Ancient",
+                category: "Sculpture",
+                site: "Rhodes, Aegean Sea",
+                date: "c. 280 BCE",
+                material: "Parian Marble",
+                dimensions: "64 × 42 × 31 cm",
+                wing: "Wing II • Classical Antiquity",
+                image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=800&q=80",
+                description: "Sculpted during the maritime supremacy of Rhodes following the lifting of Demetrius Poliorcetes' siege. Characterized by contrapposto torsion, expressive parted lips, and deeply drilled curls crowned with sacred laurel."
+            },
+            {
+                id: 2,
+                title: "Pectoral of the Golden Falcon",
+                era: "Ancient",
+                category: "Jewelry",
+                site: "Luxor, Nile Valley",
+                date: "c. 1320 BCE",
+                material: "Electrum, Turquoise & Lapis Lazuli",
+                dimensions: "18.5 × 14.2 cm",
+                wing: "Wing I • Valley of Pharaohs",
+                image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80",
+                description: "Recovered from an intact royal chamber stratum. Features the solar falcon Horus gripping shen rings of cosmic protection, inlaid with lapis lazuli transported via Bronze Age trade from Badakhshan."
+            },
+            {
+                id: 3,
+                title: "Codex Aureus Carolingian Folio",
+                era: "Medieval",
+                category: "Manuscripts",
+                site: "Abbey of Saint Gall",
+                date: "c. 870 CE",
+                material: "Chrysography (Gold Ink) on Dyed Vellum",
+                dimensions: "38 × 29 cm",
+                wing: "Wing IV • Medieval Scriptorium",
+                image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80",
+                description: "An imperial gospel book executed in Carolingian minuscule with powdered gold leaf suspensions over murex-dyed royal purple calfskin parchment. Represents the pinnacle of Western monastic bookbinding."
+            },
+            {
+                id: 4,
+                title: "Damascus Steel Inlaid Scimitar",
+                era: "Medieval",
+                category: "Weaponry",
+                site: "Aleppo Citadel Armory",
+                date: "c. 1190 CE",
+                material: "Crucible Wootz Steel & Jade Pommel",
+                dimensions: "Blade length 84 cm",
+                wing: "Wing V • Crusades & Levant",
+                image: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=800&q=80",
+                description: "Forged using crucible melting techniques yielding carbon nanotube microstructures and the celebrated water-silk visual motif. Inlaid along the fuller with silver devotional calligraphy."
+            },
+            {
+                id: 5,
+                title: "Galilean Brass Astrolabe",
+                era: "Renaissance",
+                category: "Relics",
+                site: "Florence, Grand Duchy of Tuscany",
+                date: "c. 1592 CE",
+                material: "Cast Engraved Brass & Ruby Pivot",
+                dimensions: "Diameter 21 cm",
+                wing: "Wing VI • Science & Enlightenment",
+                image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+                description: "A precision astronomical and naval computer calibrated for 43° North latitude. Allowed navigators and scholars to determine solar altitude, planetary ascendancy, and local sidereal time."
+            },
+            {
+                id: 6,
+                title: "Medici Intaglio Signet Ring",
+                era: "Renaissance",
+                category: "Jewelry",
+                site: "Palazzo Pitti, Florence",
+                date: "c. 1545 CE",
+                material: "22K Gold & Carved Carnelian",
+                dimensions: "Ring size 10 (3.2 cm outer)",
+                wing: "Wing III • Renaissance Treasury",
+                image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+                description: "Commissioned by Cosimo I de' Medici, carved with the palle heraldic insignia and laurel branches. Used by ducal chancellors to stamp scarlet beeswax upon diplomatic decrees."
+            },
+            {
+                id: 7,
+                title: "Naval Exploration Chronometer",
+                era: "Modern",
+                category: "Relics",
+                site: "Greenwich Dockyards, London",
+                date: "c. 1804 CE",
+                material: "Brass, Mahogany Case & Spring Detent",
+                dimensions: "16 × 16 × 14 cm",
+                wing: "Wing VIII • Maritime Exploration",
+                image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80",
+                description: "Precision marine clockwork incorporating thermal bimetallic compensation. Allowed 19th-century navigators to maintain accurate Greenwich mean time and solve the historic longitude problem at sea."
+            },
+            {
+                id: 8,
+                title: "Torso of an Amazon Warrior",
+                era: "Ancient",
+                category: "Sculpture",
+                site: "Ephesus, Asia Minor",
+                date: "c. 440 BCE",
+                material: "Pentelic Marble",
+                dimensions: "88 × 48 × 34 cm",
+                wing: "Wing II • Classical Antiquity",
+                image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80",
+                description: "A refined imperial Roman recreation of a lost Polykleitan bronze cast. Illustrates the short gathered chiton drapery and anatomical muscularity characteristic of Classical Peloponnesian statuary."
+            }
+        ];
+
+        const EXHIBITIONS = [
+            {
+                id: "exp-1",
+                title: "Empires of Gold & Sun",
+                dates: "Nov 01, 2026 – Feb 28, 2027",
+                hall: "West Grand Pavilion (Chamber A)",
+                status: "Selling Fast",
+                badgeColor: "amber",
+                basePrice: 18,
+                image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+                curatorNotes: "Examines cross-continental metallurgy from Nubian dynastic sarcophagi to pre-Columbian gold regalia and Bactrian crowns."
+            },
+            {
+                id: "exp-2",
+                title: "Secrets of the Silk Road",
+                dates: "Oct 15, 2026 – Mar 20, 2027",
+                hall: "Central Octagonal Rotunda",
+                status: "Limited Time",
+                badgeColor: "emerald",
+                basePrice: 18,
+                image: "https://images.unsplash.com/photo-1576016771745-f04c66432095?auto=format&fit=crop&w=800&q=80",
+                curatorNotes: "Over 180 manuscripts, Sogdian trading tablets, woven silks, and Buddhist grotto fragments tracing caravansaries across Central Asia."
+            },
+            {
+                id: "exp-3",
+                title: "Renaissance Illuminated Codices",
+                dates: "Dec 05, 2026 – Apr 10, 2027",
+                hall: "North Vault (Chamber D)",
+                status: "Exclusive Viewing",
+                badgeColor: "purple",
+                basePrice: 18,
+                image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80",
+                curatorNotes: "Privately loaned botanical sketches, anatomical treatises, and gilded prayer books by Florentine and Flemish masters."
+            }
+        ];
+
+        /* ==========================================================================
+           2. APPLICATION STATE MANAGEMENT
+           ========================================================================== */
+        let appState = {
+            searchQuery: "",
+            selectedEra: "all",
+            selectedCategory: "all",
+            tourOnly: false,
+            tourBookmarks: JSON.parse(localStorage.getItem('mhm_tour_bookmarks') || '[]'),
+            currentModalArtifact: null,
+            modalRotation: 0,
+            isSpeaking: false,
+            // Booking State
+            booking: {
+                step: 1,
+                exhibitionId: "exp-1",
+                date: "",
+                slot: "Morning (10:00 AM)",
+                tickets: { general: 1, reduced: 0, vip: 0 },
+                attendeeName: "",
+                attendeeEmail: "",
+                discountPercent: 0,
+                promoCode: ""
+            },
+            walletPasses: JSON.parse(localStorage.getItem('mhm_wallet_passes') || '[]')
+        };
+
+        /* ==========================================================================
+           3. INITIALIZATION
+           ========================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderArtifacts();
+            renderExhibitions();
+            populateBookingOptions();
+            renderWalletPasses();
+            setupSearchAndFilterEvents();
+            setDefaultBookingDate();
+            updateTourBadges();
+            updateWalletBadge();
+            setupMobileMenu();
+        });
+
+        function setupMobileMenu() {
+            const toggle = document.getElementById('mobile-toggle');
+            const drawer = document.getElementById('mobile-drawer');
+            toggle.addEventListener('click', () => drawer.classList.toggle('hidden'));
+            document.querySelectorAll('.mobile-link').forEach(l => {
+                l.addEventListener('click', () => drawer.classList.add('hidden'));
+            });
+        }
+
+        function setDefaultBookingDate() {
+            const dateInput = document.getElementById('booking-date');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const iso = tomorrow.toISOString().split('T')[0];
+            dateInput.value = iso;
+            dateInput.min = iso;
+            appState.booking.date = iso;
+        }
+
+        /* ==========================================================================
+           4. ARTIFACT EXPLORER (SEARCH, FILTER & TOUR BOOKMARKS)
+           ========================================================================== */
+        function renderArtifacts() {
+            const grid = document.getElementById('artifacts-grid');
+            const noResults = document.getElementById('no-artifacts-found');
+            grid.innerHTML = '';
+
+            const filtered = ARTIFACTS.filter(item => {
+                const matchesEra = appState.selectedEra === 'all' || item.era === appState.selectedEra;
+                const matchesCat = appState.selectedCategory === 'all' || item.category === appState.selectedCategory;
+                const q = appState.searchQuery.toLowerCase().trim();
+                const matchesQuery = !q || 
+                    item.title.toLowerCase().includes(q) ||
+                    item.site.toLowerCase().includes(q) ||
+                    item.material.toLowerCase().includes(q) ||
+                    item.era.toLowerCase().includes(q) ||
+                    item.category.toLowerCase().includes(q);
+                const matchesTour = !appState.tourOnly || appState.tourBookmarks.includes(item.id);
+
+                return matchesEra && matchesCat && matchesQuery && matchesTour;
+            });
+
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            filtered.forEach(art => {
+                const isBookmarked = appState.tourBookmarks.includes(art.id);
+                const card = document.createElement('div');
+                card.className = "group bg-museum-surface/80 rounded-2xl border border-museum-border overflow-hidden shadow-lg hover:border-museum-gold transition-all duration-300 flex flex-col justify-between";
+
+                card.innerHTML = `
+                    <div class="relative overflow-hidden h-52 bg-slate-900 cursor-pointer" onclick="openArtifactModal(${art.id})">
+                        <img src="${art.image}" alt="${art.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-museum-surface via-transparent to-transparent opacity-85"></div>
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-museum-obsidian/85 backdrop-blur-md text-[10px] text-museum-gold font-mono border border-museum-border">
+                            ${art.era} • ${art.category}
+                        </span>
+                        <button onclick="event.stopPropagation(); toggleTourBookmark(${art.id})" 
+                                class="absolute top-3 right-3 p-2 rounded-xl bg-museum-obsidian/75 backdrop-blur-md text-slate-300 hover:text-museum-gold transition">
+                            <i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'text-museum-gold fill-museum-gold' : ''}"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-1.5 text-slate-400 text-[11px] mb-1">
+                                <i data-lucide="map-pin" class="w-3 h-3 text-museum-gold"></i>
+                                <span>${art.site}</span>
+                            </div>
+                            <h3 class="font-serif font-bold text-white text-base group-hover:text-museum-goldLight transition-colors">
+                                ${art.title}
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                                ${art.description}
+                            </p>
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t border-slate-700/60 flex items-center justify-between">
+                            <button onclick="openArtifactModal(${art.id})" class="text-xs font-semibold text-museum-gold hover:underline flex items-center space-x-1">
+                                <span>Inspect 360°</span>
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="triggerQuickAudio(${art.id})" title="Listen to narration guide" class="p-2 rounded-lg bg-museum-card hover:bg-museum-gold/20 text-slate-300 hover:text-museum-gold transition">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+            updateTourBadges();
+        }
+
+        function setupSearchAndFilterEvents() {
+            const searchBox = document.getElementById('artifact-search-box');
+            const clearBtn = document.getElementById('clear-search');
+
+            searchBox.addEventListener('input', (e) => {
+                appState.searchQuery = e.target.value;
+                if (appState.searchQuery.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+                renderArtifacts();
+            });
+
+            // Era filter clicks
+            document.querySelectorAll('.era-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.era-filter-btn').forEach(b => {
+                        b.classList.remove('bg-museum-gold', 'text-museum-obsidian');
+                        b.classList.add('bg-museum-card', 'text-slate-300');
+                    });
+                    btn.classList.add('bg-museum-gold', 'text-museum-obsidian');
+                    btn.classList.remove('bg-museum-card', 'text-slate-300');
+                    appState.selectedEra = btn.getAttribute('data-era');
+                    renderArtifacts();
+                });
+            });
+
+            // Category filter clicks
+            document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.cat-filter-btn').forEach(b => {
+                        b.classList.remove('bg-museum-gold', 'text-museum-obsidian');
+                        b.classList.add('bg-museum-card', 'text-slate-300');
+                    });
+                    btn.classList.add('bg-museum-gold', 'text-museum-obsidian');
+                    btn.classList.remove('bg-museum-card', 'text-slate-300');
+                    appState.selectedCategory = btn.getAttribute('data-cat');
+                    renderArtifacts();
+                });
+            });
+        }
+
+        function clearSearchFilter() {
+            const input = document.getElementById('artifact-search-box');
+            input.value = '';
+            appState.searchQuery = '';
+            document.getElementById('clear-search').classList.add('hidden');
+            renderArtifacts();
+        }
+
+        function toggleTourFilter() {
+            appState.tourOnly = !appState.tourOnly;
+            const btn = document.getElementById('tour-filter-toggle');
+            const navBtn = document.getElementById('tour-nav-btn');
+
+            if (appState.tourOnly) {
+                btn.classList.add('bg-museum-gold', 'text-museum-obsidian');
+                btn.classList.remove('text-slate-200', 'bg-museum-surface');
+                if (navBtn) {
+                    navBtn.classList.add('bg-museum-gold', 'text-museum-obsidian');
+                    navBtn.classList.remove('text-slate-300', 'bg-museum-surface');
+                }
+            } else {
+                btn.classList.remove('bg-museum-gold', 'text-museum-obsidian');
+                btn.classList.add('text-slate-200', 'bg-museum-surface');
+                if (navBtn) {
+                    navBtn.classList.remove('bg-museum-gold', 'text-museum-obsidian');
+                    navBtn.classList.add('text-slate-300', 'bg-museum-surface');
+                }
+            }
+            renderArtifacts();
+        }
+
+        function toggleTourBookmark(id) {
+            const idx = appState.tourBookmarks.indexOf(id);
+            if (idx > -1) {
+                appState.tourBookmarks.splice(idx, 1);
+                showToast("Removed relic from your tour list");
+            } else {
+                appState.tourBookmarks.push(id);
+                showToast("Artifact added to your custom tour itinerary");
+            }
+            localStorage.setItem('mhm_tour_bookmarks', JSON.stringify(appState.tourBookmarks));
+            renderArtifacts();
+            updateModalTourState();
+        }
+
+        function updateTourBadges() {
+            const count = appState.tourBookmarks.length;
+            const label = document.getElementById('tour-filter-label');
+            const navLabel = document.getElementById('nav-tour-label');
+            if (label) label.innerText = `My Tour (${count})`;
+            if (navLabel) navLabel.innerText = `My Tour (${count})`;
+        }
+
+        function resetAllFilters() {
+            appState.searchQuery = "";
+            appState.selectedEra = "all";
+            appState.selectedCategory = "all";
+            appState.tourOnly = false;
+            document.getElementById('artifact-search-box').value = "";
+            document.getElementById('clear-search').classList.add('hidden');
+
+            document.querySelectorAll('.era-filter-btn').forEach((b, idx) => {
+                if (idx === 0) {
+                    b.classList.add('bg-museum-gold', 'text-museum-obsidian');
+                    b.classList.remove('bg-museum-card', 'text-slate-300');
+                } else {
+                    b.classList.remove('bg-museum-gold', 'text-museum-obsidian');
+                    b.classList.add('bg-museum-card', 'text-slate-300');
+                }
+            });
+
+            document.querySelectorAll('.cat-filter-btn').forEach((b, idx) => {
+                if (idx === 0) {
+                    b.classList.add('bg-museum-gold', 'text-museum-obsidian');
+                    b.classList.remove('bg-museum-card', 'text-slate-300');
+                } else {
+                    b.classList.remove('bg-museum-gold', 'text-museum-obsidian');
+                    b.classList.add('bg-museum-card', 'text-slate-300');
+                }
+            });
+            renderArtifacts();
+        }
+
+        /* ==========================================================================
+           5. ARTIFACT MODAL (360 SIMULATION & WEB SPEECH AUDIO GUIDE)
+           ========================================================================== */
+        function openArtifactModal(id) {
+            const art = ARTIFACTS.find(a => a.id === id);
+            if (!art) return;
+
+            appState.currentModalArtifact = art;
+            appState.modalRotation = 0;
+            stopSpeechAudio();
+
+            document.getElementById('modal-title').innerText = art.title;
+            document.getElementById('modal-era').innerText = `${art.era} • ${art.category}`;
+            document.getElementById('modal-wing').innerText = art.wing;
+            document.getElementById('modal-image').src = art.image;
+            document.getElementById('modal-desc').innerText = art.description;
+            document.getElementById('modal-date').innerText = art.date;
+            document.getElementById('modal-site').innerText = art.site;
+            document.getElementById('modal-material').innerText = art.material;
+            document.getElementById('modal-dimensions').innerText = art.dimensions;
+
+            const slider = document.getElementById('modal-slider');
+            slider.value = 0;
+            updateRotationTransform(0);
+
+            slider.oninput = function() {
+                updateRotationTransform(this.value);
+            };
+
+            updateModalTourState();
+
+            const modal = document.getElementById('artifact-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            lucide.createIcons();
+        }
+
+        function closeArtifactModal() {
+            stopSpeechAudio();
+            const modal = document.getElementById('artifact-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+            appState.currentModalArtifact = null;
+        }
+
+        function updateRotationTransform(degrees) {
+            appState.modalRotation = degrees;
+            const img = document.getElementById('modal-image');
+            const label = document.getElementById('modal-angle-label');
+            label.innerText = `Rotation: ${degrees}°`;
+
+            const scale = 1 + Math.sin((degrees * Math.PI) / 180) * 0.08;
+            img.style.transform = `rotateY(${degrees}deg) scale(${scale})`;
+        }
+
+        function stepRotation(delta) {
+            let cur = parseInt(appState.modalRotation, 10) || 0;
+            let target = (cur + delta + 360) % 360;
+            document.getElementById('modal-slider').value = target;
+            updateRotationTransform(target);
+        }
+
+        function resetModalRotation() {
+            document.getElementById('modal-slider').value = 0;
+            updateRotationTransform(0);
+        }
+
+        function updateModalTourState() {
+            if (!appState.currentModalArtifact) return;
+            const isBookmarked = appState.tourBookmarks.includes(appState.currentModalArtifact.id);
+            const text = document.getElementById('modal-tour-text');
+            const icon = document.getElementById('modal-tour-icon');
+            if (isBookmarked) {
+                text.innerText = "Saved In My Tour";
+                icon.classList.add('text-museum-gold', 'fill-museum-gold');
+            } else {
+                text.innerText = "Add to My Tour";
+                icon.classList.remove('text-museum-gold', 'fill-museum-gold');
+            }
+        }
+
+        function toggleModalTour() {
+            if (appState.currentModalArtifact) {
+                toggleTourBookmark(appState.currentModalArtifact.id);
+            }
+        }
+
+        /* --- Audio Guide Simulator (Web Speech API) --- */
+        function toggleSpeechAudio() {
+            if (appState.isSpeaking) {
+                stopSpeechAudio();
+            } else {
+                startSpeechAudio();
+            }
+        }
+
+        function startSpeechAudio() {
+            if (!appState.currentModalArtifact) return;
+            if (!('speechSynthesis' in window)) {
+                showToast("Speech synthesis is not supported on this browser.");
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const narrative = `${appState.currentModalArtifact.title}. Discovered at ${appState.currentModalArtifact.site}, dating to ${appState.currentModalArtifact.date}. Crafted with ${appState.currentModalArtifact.material}. ${appState.currentModalArtifact.description}. Displayed in ${appState.currentModalArtifact.wing}.`;
+            const utterance = new SpeechSynthesisUtterance(narrative);
+            utterance.rate = 0.95;
+
+            const icon = document.getElementById('modal-play-icon');
+            const status = document.getElementById('speech-status-tag');
+            const bar = document.getElementById('speech-progress');
+
+            utterance.onstart = () => {
+                appState.isSpeaking = true;
+                icon.setAttribute('data-lucide', 'square');
+                status.innerText = "Narrating...";
+                status.classList.add('text-emerald-400');
+                bar.style.width = "85%";
+                lucide.createIcons();
+            };
+
+            utterance.onend = () => stopSpeechAudio();
+            utterance.onerror = () => stopSpeechAudio();
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopSpeechAudio() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            appState.isSpeaking = false;
+            const icon = document.getElementById('modal-play-icon');
+            const status = document.getElementById('speech-status-tag');
+            const bar = document.getElementById('speech-progress');
+            if (icon) {
+                icon.setAttribute('data-lucide', 'play');
+                lucide.createIcons();
+            }
+            if (status) {
+                status.innerText = "Ready";
+                status.classList.remove('text-emerald-400');
+            }
+            if (bar) bar.style.width = "0%";
+        }
+
+        function triggerQuickAudio(id) {
+            openArtifactModal(id);
+            setTimeout(() => {
+                startSpeechAudio();
+            }, 350);
+        }
+
+        /* ==========================================================================
+           6. EXHIBITIONS SHOWCASE
+           ========================================================================== */
+        function renderExhibitions() {
+            const container = document.getElementById('exhibitions-grid');
+            container.innerHTML = '';
+
+            EXHIBITIONS.forEach(exp => {
+                const card = document.createElement('div');
+                card.className = "bg-museum-surface border border-museum-border rounded-2xl overflow-hidden flex flex-col justify-between shadow-xl hover:border-museum-gold transition-all duration-300";
+
+                card.innerHTML = `
+                    <div class="relative h-48 bg-slate-900">
+                        <img src="${exp.image}" alt="${exp.title}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-museum-surface via-transparent to-transparent"></div>
+                        <span class="absolute top-3 right-3 text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-museum-obsidian/90 text-museum-gold border border-museum-border">
+                            ${exp.status}
+                        </span>
+                    </div>
+
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 text-xs text-museum-gold font-mono mb-1">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                                <span>${exp.dates}</span>
+                            </div>
+                            <h3 class="font-serif text-xl font-bold text-white mb-2">${exp.title}</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed mb-4">${exp.curatorNotes}</p>
+                            <p class="text-[11px] text-slate-400 font-mono mb-4">Location: ${exp.hall}</p>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-700/60 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase block font-mono">Admission</span>
+                                <span class="font-serif text-lg font-bold text-museum-gold">From $${exp.basePrice}</span>
+                            </div>
+                            <button onclick="bookSpecificExhibition('${exp.id}')" class="px-4 py-2 bg-gradient-to-r from-museum-gold to-museum-goldMuted text-museum-obsidian rounded-xl text-xs font-bold hover:brightness-110 transition shadow">
+                                Reserve Pass
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function populateBookingOptions() {
+            const container = document.getElementById('booking-exhibition-cards');
+            container.innerHTML = '';
+
+            const general = {
+                id: 'exp-general',
+                title: 'Permanent Galleries General Pass',
+                hall: 'Access to Wings I through VIII',
+                curatorNotes: 'Comprehensive access to classical antiquities, sarcophagi, and royal coin collections.'
+            };
+
+            const options = [general, ...EXHIBITIONS];
+
+            options.forEach(opt => {
+                const isSelected = appState.booking.exhibitionId === opt.id;
+                const div = document.createElement('div');
+                div.id = `exp-sel-${opt.id}`;
+                div.className = `cursor-pointer p-4 rounded-xl border transition-all ${
+                    isSelected ? 'border-museum-gold bg-museum-card ring-1 ring-museum-gold' : 'border-slate-800 bg-museum-dark hover:border-slate-600'
+                }`;
+                div.onclick = () => selectBookingExhibition(opt.id, opt.title);
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h4 class="font-serif font-bold text-sm text-white">${opt.title}</h4>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">${opt.curatorNotes}</p>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-museum-gold ml-2 whitespace-nowrap">TIMED</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectBookingExhibition(id, title) {
+            appState.booking.exhibitionId = id;
+            document.querySelectorAll('#booking-exhibition-cards > div').forEach(c => {
+                c.className = 'cursor-pointer p-4 rounded-xl border transition-all border-slate-800 bg-museum-dark hover:border-slate-600';
+            });
+            const selected = document.getElementById(`exp-sel-${id}`);
+            if (selected) {
+                selected.className = 'cursor-pointer p-4 rounded-xl border transition-all border-museum-gold bg-museum-card ring-1 ring-museum-gold';
+            }
+            document.getElementById('step2-exhibition-label').innerText = title || "Selected Exhibition";
+        }
+
+        function bookSpecificExhibition(id) {
+            const exp = EXHIBITIONS.find(e => e.id === id);
+            selectBookingExhibition(id, exp ? exp.title : 'Exhibition Admission');
+            advanceBookingStep(2);
+            document.getElementById('ticketing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* ==========================================================================
+           7. EXHIBITION PASS BOOKING SYSTEM (DYNAMIC PRICING & PROMO CODES)
+           ========================================================================== */
+        function advanceBookingStep(step) {
+            appState.booking.step = step;
+            document.getElementById('flow-step-1').classList.add('hidden');
+            document.getElementById('flow-step-2').classList.add('hidden');
+            document.getElementById('flow-step-3').classList.add('hidden');
+
+            const s2 = document.getElementById('step-nav-2');
+            const s3 = document.getElementById('step-nav-3');
+
+            if (step === 1) {
+                document.getElementById('flow-step-1').classList.remove('hidden');
+                s2.classList.remove('text-museum-gold');
+                s2.classList.add('text-slate-500');
+            } else if (step === 2) {
+                document.getElementById('flow-step-2').classList.remove('hidden');
+                s2.classList.add('text-museum-gold');
+                s2.classList.remove('text-slate-500');
+                calculatePricingTotals();
+            } else if (step === 3) {
+                document.getElementById('flow-step-3').classList.remove('hidden');
+                s3.classList.add('text-museum-gold');
+                s3.classList.remove('text-slate-500');
+            }
+            lucide.createIcons();
+        }
+
+        function selectSlot(btn, slotName) {
+            appState.booking.slot = slotName;
+            document.querySelectorAll('.slot-btn').forEach(b => {
+                b.className = 'slot-btn py-2 text-xs rounded-xl border border-slate-700 bg-museum-dark hover:border-museum-gold text-slate-200';
+            });
+            btn.className = 'slot-btn py-2 text-xs rounded-xl border border-museum-gold bg-museum-gold text-museum-obsidian font-semibold';
+        }
+
+        function modifyTicketQty(type, delta) {
+            const current = appState.booking.tickets[type];
+            const next = Math.max(0, current + delta);
+            appState.booking.tickets[type] = next;
+
+            // Enforce minimum 1 ticket
+            const totalTickets = appState.booking.tickets.general + appState.booking.tickets.reduced + appState.booking.tickets.vip;
+            if (totalTickets === 0) {
+                appState.booking.tickets[type] = 1;
+                showToast("At least one admission pass is required.");
+            }
+
+            document.getElementById(`qty-${type}`).innerText = appState.booking.tickets[type];
+            calculatePricingTotals();
+        }
+
+        function applyPromoCode() {
+            const input = document.getElementById('promo-code-input');
+            const msg = document.getElementById('promo-message');
+            const code = input.value.trim().toUpperCase();
+
+            if (code === 'MUSEUM10') {
+                appState.booking.discountPercent = 10;
+                appState.booking.promoCode = code;
+                msg.innerText = "10% Historic Member discount applied!";
+                msg.className = "text-[11px] font-mono mt-1 block text-emerald-400";
+            } else if (code === 'ARCHIVE20') {
+                appState.booking.discountPercent = 20;
+                appState.booking.promoCode = code;
+                msg.innerText = "20% Scholar discount applied!";
+                msg.className = "text-[11px] font-mono mt-1 block text-emerald-400";
+            } else {
+                appState.booking.discountPercent = 0;
+                appState.booking.promoCode = "";
+                msg.innerText = "Invalid discount code.";
+                msg.className = "text-[11px] font-mono mt-1 block text-rose-400";
+            }
+            calculatePricingTotals();
+        }
+
+        function calculatePricingTotals() {
+            const genPrice = 18;
+            const redPrice = 12;
+            const vipPrice = 30;
+
+            const subtotal = (appState.booking.tickets.general * genPrice) +
+                             (appState.booking.tickets.reduced * redPrice) +
+                             (appState.booking.tickets.vip * vipPrice);
+
+            const discountAmount = subtotal * (appState.booking.discountPercent / 100);
+            const discountedSubtotal = subtotal - discountAmount;
+            const tax = discountedSubtotal * 0.08;
+            const grandTotal = discountedSubtotal + tax;
+
+            document.getElementById('bill-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('bill-tax').innerText = `$${tax.toFixed(2)}`;
+            document.getElementById('bill-total').innerText = `$${grandTotal.toFixed(2)}`;
+
+            const discountRow = document.getElementById('bill-discount-row');
+            if (discountAmount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('bill-discount').innerText = `$${discountAmount.toFixed(2)} (${appState.booking.discountPercent}%)`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+
+            return { subtotal, tax, discountAmount, grandTotal };
+        }
+
+        function generateDigitalPass() {
+            const nameInput = document.getElementById('attendee-name');
+            const emailInput = document.getElementById('attendee-email');
+            const dateInput = document.getElementById('booking-date');
+
+            if (!nameInput.value.trim()) {
+                showToast("Please enter lead attendee name.");
+                nameInput.focus();
+                return;
+            }
+            if (!emailInput.value.trim() || !emailInput.value.includes('@')) {
+                showToast("Please enter a valid email address.");
+                emailInput.focus();
+                return;
+            }
+
+            appState.booking.attendeeName = nameInput.value.trim();
+            appState.booking.attendeeEmail = emailInput.value.trim();
+            appState.booking.date = dateInput.value;
+
+            // Generate Booking Record
+            const passRef = "MHM-" + Math.floor(100000 + Math.random() * 900000);
+            const selectedExhibition = EXHIBITIONS.find(e => e.id === appState.booking.exhibitionId) || {
+                title: "Permanent Galleries Pass",
+                hall: "Wings I – VIII Main Hall"
+            };
+
+            const totalGuests = appState.booking.tickets.general + appState.booking.tickets.reduced + appState.booking.tickets.vip;
+            const pricing = calculatePricingTotals();
+
+            let tierSummary = [];
+            if (appState.booking.tickets.general > 0) tierSummary.push(`${appState.booking.tickets.general} General`);
+            if (appState.booking.tickets.reduced > 0) tierSummary.push(`${appState.booking.tickets.reduced} Student/Senior`);
+            if (appState.booking.tickets.vip > 0) tierSummary.push(`${appState.booking.tickets.vip} VIP Curator`);
+
+            const passRecord = {
+                id: passRef,
+                title: selectedExhibition.title,
+                hall: selectedExhibition.hall,
+                attendee: appState.booking.attendeeName,
+                email: appState.booking.attendeeEmail,
+                date: appState.booking.date,
+                slot: appState.booking.slot,
+                totalTickets: totalGuests,
+                tierBreakdown: tierSummary.join(', '),
+                totalPaid: pricing.grandTotal.toFixed(2),
+                issuedDate: new Date().toLocaleDateString()
+            };
+
+            // Save to Wallet storage
+            appState.walletPasses.unshift(passRecord);
+            localStorage.setItem('mhm_wallet_passes', JSON.stringify(appState.walletPasses));
+            updateWalletBadge();
+
+            // Populate Pass View
+            document.getElementById('ticket-view-title').innerText = passRecord.title;
+            document.getElementById('ticket-view-ref').innerText = `#${passRecord.id}`;
+            document.getElementById('ticket-view-name').innerText = passRecord.attendee;
+            document.getElementById('ticket-view-slot').innerText = `${passRecord.date} • ${passRecord.slot}`;
+            document.getElementById('ticket-view-wing').innerText = passRecord.hall;
+            document.getElementById('ticket-view-tier').innerText = `${passRecord.totalTickets} Guests • ${passRecord.tierBreakdown}`;
+            document.getElementById('ticket-view-code').innerText = `BARCODE-${passRecord.id}`;
+
+            // Build QR Code
+            renderPassQrCode(passRecord.id, passRecord.attendee, passRecord.title);
+
+            advanceBookingStep(3);
+            renderWalletPasses();
+            showToast("Admission pass generated & saved to wallet!");
+        }
+
+        function renderPassQrCode(id, name, title) {
+            const container = document.getElementById('pass-qrcode-box');
+            container.innerHTML = '';
+            const qrText = `PANTHEON-ENTRY:${id}|ATTENDEE:${name}|EXHIBITION:${title}|STATUS:AUTHORIZED`;
+            
+            new QRCode(container, {
+                text: qrText,
+                width: 140,
+                height: 140,
+                colorDark: "#1f1a17",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+
+        function resetBookingFlow() {
+            document.getElementById('attendee-name').value = '';
+            document.getElementById('attendee-email').value = '';
+            document.getElementById('promo-code-input').value = '';
+            document.getElementById('promo-message').innerText = '';
+            appState.booking.discountPercent = 0;
+            appState.booking.tickets = { general: 1, reduced: 0, vip: 0 };
+            document.getElementById('qty-general').innerText = "1";
+            document.getElementById('qty-reduced').innerText = "0";
+            document.getElementById('qty-vip').innerText = "0";
+            advanceBookingStep(1);
+        }
+
+        /* ==========================================================================
+           8. PASS WALLET (LOCALSTORAGE MANAGEMENT)
+           ========================================================================== */
+        function renderWalletPasses() {
+            const list = document.getElementById('wallet-passes-grid');
+            const emptyNotice = document.getElementById('wallet-empty');
+            list.innerHTML = '';
+
+            if (appState.walletPasses.length === 0) {
+                emptyNotice.classList.remove('hidden');
+                return;
+            } else {
+                emptyNotice.classList.add('hidden');
+            }
+
+            appState.walletPasses.forEach((pass, index) => {
+                const item = document.createElement('div');
+                item.className = "bg-museum-surface/90 border border-museum-border rounded-2xl p-5 shadow-lg flex flex-col justify-between";
+
+                item.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60">
+                            <div>
+                                <span class="text-[9px] uppercase font-mono tracking-wider text-museum-gold">EXHIBITION PASS</span>
+                                <h4 class="font-serif font-bold text-white text-base">${pass.title}</h4>
+                            </div>
+                            <span class="text-xs font-mono text-museum-goldLight">#${pass.id}</span>
+                        </div>
+
+                        <div class="py-4 space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Guest:</span>
+                                <span class="font-medium text-slate-100">${pass.attendee}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Entry Slot:</span>
+                                <span class="text-slate-200">${pass.date} • ${pass.slot}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Total Admissions:</span>
+                                <span class="text-slate-200">${pass.totalTickets} Ticket(s)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Chamber:</span>
+                                <span class="text-slate-300">${pass.hall}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between">
+                        <span class="text-[10px] text-emerald-400 font-mono flex items-center space-x-1">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                            <span>Verified Entry</span>
+                        </span>
+                        <div class="flex space-x-2">
+                            <button onclick="viewExistingWalletPass('${pass.id}')" class="px-3 py-1.5 bg-museum-gold/20 text-museum-gold text-xs rounded-lg hover:bg-museum-gold hover:text-museum-obsidian transition">
+                                View Pass
+                            </button>
+                            <button onclick="removeWalletPass(${index})" class="p-1.5 text-slate-400 hover:text-rose-400 transition" title="Delete pass">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+            updateWalletBadge();
+        }
+
+        function viewExistingWalletPass(id) {
+            const pass = appState.walletPasses.find(p => p.id === id);
+            if (!pass) return;
+
+            document.getElementById('ticket-view-title').innerText = pass.title;
+            document.getElementById('ticket-view-ref').innerText = `#${pass.id}`;
+            document.getElementById('ticket-view-name').innerText = pass.attendee;
+            document.getElementById('ticket-view-slot').innerText = `${pass.date} • ${pass.slot}`;
+            document.getElementById('ticket-view-wing').innerText = pass.hall;
+            document.getElementById('ticket-view-tier').innerText = `${pass.totalTickets} Passes • ${pass.tierBreakdown}`;
+            document.getElementById('ticket-view-code').innerText = `BARCODE-${pass.id}`;
+
+            renderPassQrCode(pass.id, pass.attendee, pass.title);
+            advanceBookingStep(3);
+            document.getElementById('ticketing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function removeWalletPass(index) {
+            appState.walletPasses.splice(index, 1);
+            localStorage.setItem('mhm_wallet_passes', JSON.stringify(appState.walletPasses));
+            renderWalletPasses();
+            showToast("Pass removed from wallet");
+        }
+
+        function clearWalletPasses() {
+            if (appState.walletPasses.length === 0) return;
+            appState.walletPasses = [];
+            localStorage.removeItem('mhm_wallet_passes');
+            renderWalletPasses();
+            showToast("All stored passes cleared");
+        }
+
+        function updateWalletBadge() {
+            const count = appState.walletPasses.length;
+            const badge = document.getElementById('nav-pass-badge');
+            if (badge) {
+                badge.innerText = count;
+                if (count > 0) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        /* ==========================================================================
+           9. TOAST NOTIFICATION UTILITY
+           ========================================================================== */
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const label = document.getElementById('toast-message');
+            label.innerText = msg;
+
+            clearTimeout(toastTimer);
+            toast.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+    </script>
+<script>
+(function () {
+    /* 1. scroll progress, sticky header shrink, back-to-top */
+    const bar = document.getElementById('scroll-progress');
+    const topBtn = document.getElementById('to-top');
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+        const h = document.documentElement.scrollHeight - innerHeight;
+        bar.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + '%';
+        topBtn.classList.toggle('show', scrollY > 600);
+        header.classList.toggle('scrolled', scrollY > 60);
+    }, { passive: true });
+
+    /* 2. mouse spotlight */
+    window.addEventListener('pointermove', e => {
+        document.documentElement.style.setProperty('--mx', e.clientX + 'px');
+        document.documentElement.style.setProperty('--my', e.clientY + 'px');
+    }, { passive: true });
+
+    /* 3. reveal-on-scroll for headings, filters and info cards */
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('section h2, section .rounded-2xl, section .rounded-3xl, #visitor-info .grid > div')
+        .forEach(el => { el.classList.add('reveal'); io.observe(el); });
+
+    /* 4. animated counters in the hero (3,400+ / 8 Wings / 100%) */
+    document.querySelectorAll('#hero .grid-cols-3 .font-serif').forEach(el => {
+        const m = el.textContent.trim().match(/^([\d,]+)(.*)$/);
+        if (!m) return;
+        const target = parseInt(m[1].replace(/,/g, ''), 10), suffix = m[2], t0 = performance.now(), dur = 1800;
+        (function tick(now) {
+            const p = Math.min((now - t0) / dur, 1), val = Math.round(target * (1 - Math.pow(1 - p, 3)));
+            el.textContent = val.toLocaleString() + suffix;
+            if (p < 1) requestAnimationFrame(tick);
+        })(t0);
+    });
+
+    /* 5. 3D tilt on artifact and exhibition cards */
+    ['artifacts-grid', 'exhibitions-grid'].forEach(id => {
+        const grid = document.getElementById(id);
+        grid.addEventListener('mousemove', e => {
+            const card = e.target.closest('#' + id + ' > div');
+            if (!card) return;
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+            card.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-4px)`;
+        });
+        grid.addEventListener('mouseout', e => {
+            const card = e.target.closest('#' + id + ' > div');
+            if (card && !card.contains(e.relatedTarget)) card.style.transform = '';
+        });
+    });
+
+    /* 6. drag-to-rotate the artifact in the modal (real 360° feel) */
+    const img = document.getElementById('modal-image');
+    img.parentElement.style.perspective = '900px';
+    img.draggable = false;
+    let dragging = false, startX = 0, startAngle = 0;
+    img.addEventListener('pointerdown', e => {
+        dragging = true; startX = e.clientX; startAngle = parseInt(appState.modalRotation, 10) || 0;
+        img.setPointerCapture(e.pointerId);
+    });
+    img.addEventListener('pointermove', e => {
+        if (!dragging) return;
+        const angle = ((startAngle + Math.round((e.clientX - startX) / 2)) % 360 + 360) % 360;
+        document.getElementById('modal-slider').value = angle;
+        updateRotationTransform(angle);
+    });
+    ['pointerup', 'pointercancel'].forEach(ev => img.addEventListener(ev, () => dragging = false));
+
+    /* 7. keyboard: Esc closes modal, arrows rotate it */
+    document.addEventListener('keydown', e => {
+        const open = document.getElementById('artifact-modal').classList.contains('flex');
+        if (!open) return;
+        if (e.key === 'Escape') closeArtifactModal();
+        if (e.key === 'ArrowLeft') stepRotation(-15);
+        if (e.key === 'ArrowRight') stepRotation(15);
+    });
+
+    /* 8. "Surprise me" button in the hero – opens a random artifact */
+    const cta = document.querySelector('#hero .flex.flex-col.sm\\:flex-row');
+    if (cta) {
+        const b = document.createElement('button');
+        b.className = 'w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-7 py-3.5 rounded-xl font-semibold border border-dashed border-museum-gold/50 text-museum-goldLight hover:bg-museum-gold/10 transition-all';
+        b.innerHTML = '<span>✨ Surprise Me</span>';
+        b.onclick = () => openArtifactModal(ARTIFACTS[Math.floor(Math.random() * ARTIFACTS.length)].id);
+        cta.appendChild(b);
+    }
+})();
+</script>
+
+</body>
+</html>
